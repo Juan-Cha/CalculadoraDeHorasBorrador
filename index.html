@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Horario Laboral</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .logo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 100px;
+            height: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .employee-list {
+            margin-top: 20px;
+        }
+        .employee {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .days-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .days-container label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .day-hours {
+            margin: 10px 0;
+        }
+        .time-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .time-inputs input, .time-inputs select {
+            flex: 1;
+        }
+        #day-hours-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            row-gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo en la esquina superior derecha -->
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Logo_vector.png/480px-Logo_vector.png" alt="Logo" class="logo">
+
+    <div class="container">
+        <h1>Calculadora de Horario Laboral</h1>
+        
+        <!-- Sección de días trabajados -->
+        <div class="form-group">
+            <label>Días trabajados:</label>
+            <div class="days-container" id="days-container">
+                <label><input type="checkbox" value="lunes" onchange="toggleDayInputs(this)"> Lunes</label>
+                <label><input type="checkbox" value="martes" onchange="toggleDayInputs(this)"> Martes</label>
+                <label><input type="checkbox" value="miércoles" onchange="toggleDayInputs(this)"> Miércoles</label>
+                <label><input type="checkbox" value="jueves" onchange="toggleDayInputs(this)"> Jueves</label>
+                <label><input type="checkbox" value="viernes" onchange="toggleDayInputs(this)"> Viernes</label>
+                <label><input type="checkbox" value="sábado" onchange="toggleDayInputs(this)"> Sábado</label>
+                <label><input type="checkbox" value="domingo" onchange="toggleDayInputs(this)"> Domingo</label>
+            </div>
+        </div>
+
+        <div id="day-hours-container"></div>
+
+        <!-- Sección de empleados -->
+        <div id="employee-section">
+            <h2>Empleados</h2>
+            <div id="employee-list" class="employee-list">
+                <!-- Lista dinámica de empleados -->
+            </div>
+            <button type="button" onclick="addEmployee()">Agregar empleado</button>
+        </div>
+    </div>
+
+    <script>
+        let employeeCount = 0;
+
+const weekOrder = [
+    "lunes",
+    "martes",
+    "miércoles",
+    "jueves",
+    "viernes",
+    "sábado",
+    "domingo"
+];
+
+function toggleDayInputs(checkbox) {
+    const day = checkbox.value;
+    const dayHoursContainer = document.getElementById("day-hours-container");
+    let container = document.getElementById(`hours-${day}`);
+
+    if (checkbox.checked) {
+        if (!container) {
+            container = document.createElement('div');
+            container.id = `hours-${day}`;
+            container.classList.add('day-hours');
+
+            container.innerHTML = `
+                <h4>Horas trabajadas el ${day.charAt(0).toUpperCase() + day.slice(1)}:</h4>
+                <div class="time-inputs">
+                    <div>
+                        <label>Inicio:</label>
+                        <input type="time" id="start-${day}">
+                    </div>
+                    <div>
+                        <label>Fin:</label>
+                        <input type="time" id="end-${day}">
+                    </div>
+                </div>
+            `;
+
+            dayHoursContainer.appendChild(container);
+        }
+    } else if (container) {
+        container.remove();
+    }
+
+    reorderDayInputs();
+}
+
+function reorderDayInputs() {
+    const dayHoursContainer = document.getElementById("day-hours-container");
+    const children = Array.from(dayHoursContainer.children);
+
+    children.sort((a, b) => {
+        const dayA = a.id.split("-")[1];
+        const dayB = b.id.split("-")[1];
+        return weekOrder.indexOf(dayA) - weekOrder.indexOf(dayB);
+    });
+
+    children.forEach(child => dayHoursContainer.appendChild(child));
+}
+
+function addEmployee() {
+    employeeCount++;
+
+    const employeeDiv = document.createElement('div');
+    employeeDiv.classList.add('employee');
+    employeeDiv.setAttribute('id', `employee-${employeeCount}`);
+    
+    employeeDiv.innerHTML = `
+        <h3>Empleado ${employeeCount}</h3>
+        <div class="form-group">
+            <label>Nombre del empleado:</label>
+            <input type="text" placeholder="Nombre del empleado">
+        </div>
+        <div class="form-group">
+            <label>Pago por hora ($):</label>
+            <input type="number" min="0" step="0.01" placeholder="Pago por hora" required>
+        </div>
+        <div class="form-group">
+            <label>Total a pagar ($):</label>
+            <input type="text" placeholder="Total" readonly>
+        </div>
+        <button type="button" onclick="calculateTotalHours(${employeeCount})">Calcular</button>
+    `;
+
+    document.getElementById('employee-list').appendChild(employeeDiv);
+}
+
+function calculateTotalHours(employeeId) {
+    const employeeDiv = document.getElementById(`employee-${employeeId}`);
+    const rate = parseFloat(employeeDiv.querySelector('input[placeholder="Pago por hora"]').value);
+
+    if (isNaN(rate)) {
+        alert('Por favor, ingrese un pago por hora válido.');
+        return;
+    }
+
+    let totalHours = 0;
+
+    document.querySelectorAll('.day-hours').forEach(dayContainer => {
+        const day = dayContainer.id.split('-')[1];
+        const startTime = document.getElementById(`start-${day}`).value;
+        const endTime = document.getElementById(`end-${day}`).value;
+
+        if (startTime && endTime) {
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+            const startInMinutes = startHours * 60 + startMinutes;
+            const endInMinutes = endHours * 60 + endMinutes;
+
+            if (endInMinutes > startInMinutes) {
+                const diffInMinutes = endInMinutes - startInMinutes;
+                totalHours += diffInMinutes / 60;
+            } else {
+                alert(`El horario de fin debe ser mayor al de inicio para ${day}.`);
+            }
+        }
+    });
+
+    const totalPay = totalHours * rate;
+    employeeDiv.querySelector('input[placeholder="Total"]').value = totalPay.toFixed(2);
+}
+
+    </script>
+</body>
+</html>
